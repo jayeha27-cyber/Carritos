@@ -1,0 +1,352 @@
+<title>Carrito de Publicaciones</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap">
+<style>
+/* Layout: una columna estrecha pensada para leer en el teléfono frente al carrito; ficha del carrito arriba, pasos después */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --fg:#1b2633; --muted:#5a6877; --line:#dbe1e8;
+  --accent:#1f5f8b; --accent-soft:#e3eef6; --warn:#a4561a; --warn-soft:#fbeee2;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible",ui-sans-serif,system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#11171e; --surface:#1a222c; --fg:#e7edf3; --muted:#9aa8b6; --line:#2c3846;
+  --accent:#7fb6dc; --accent-soft:#1d3142; --warn:#e9a46b; --warn-soft:#3a2a1c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11171e; --surface:#1a222c; --fg:#e7edf3; --muted:#9aa8b6; --line:#2c3846;
+  --accent:#7fb6dc; --accent-soft:#1d3142; --warn:#e9a46b; --warn-soft:#3a2a1c; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.55}
+.wrap{max-width:640px;margin:0 auto;padding:28px 16px 48px;display:grid;gap:22px}
+h1,h2{font-family:var(--display);text-wrap:balance;margin:0}
+h1{font-size:2rem;font-weight:800;line-height:1.1}
+h2{font-size:1.2rem;font-weight:600;display:flex;align-items:center;gap:10px}
+.eyebrow{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+header{display:grid;gap:6px}
+.lead{color:var(--muted);margin:0}
+.tabs{display:flex;flex-wrap:wrap;gap:8px}
+.tabs button{font:inherit;cursor:pointer;padding:6px 14px;border-radius:999px;border:1px solid var(--line);color:var(--fg);text-decoration:none;font-weight:700;font-size:.92rem;background:var(--surface)}
+.tabs button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+.tabs button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.ficha{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:14px}
+.ficha dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:10px 16px}
+.ficha dt{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;padding-top:3px}
+.ficha dd{margin:0;min-width:0}
+.pend{color:var(--warn);font-style:italic}
+.num{font-family:var(--display);font-size:1.5rem;font-weight:800;color:var(--accent)}
+section{display:grid;gap:10px}
+ul{margin:0;padding-left:1.2em;display:grid;gap:6px}
+.icon{width:30px;height:30px;border-radius:8px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:none}
+.icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.devolver{background:var(--warn-soft);border-radius:14px;padding:18px;display:grid;gap:8px}
+.devolver h2 .icon{background:var(--surface);color:var(--warn)}
+.registro{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:10px}
+.grupo{display:grid;gap:10px}
+.checks{border:0;margin:0;padding:0;display:grid;gap:4px}
+.checks legend{padding:0;margin-bottom:6px}
+.checks label{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;cursor:pointer}
+.checks input{width:22px;height:22px;flex:none;accent-color:var(--accent);margin:0}
+.checks label:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.checks input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.seg{border:0;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg legend{padding:0;margin-bottom:8px}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{text-align:center;padding:11px;border-radius:10px;border:2px solid var(--line);font-weight:700;cursor:pointer}
+.seg input:checked+label{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.seg input:focus-visible+label{outline:3px solid var(--accent);outline-offset:2px}
+.porque{border-left:4px solid var(--accent);padding:4px 0 4px 14px;display:grid;gap:4px}
+.porque p{margin:0;color:var(--muted)}
+.prob-btns{display:grid;gap:8px}
+.registro textarea{resize:vertical}
+.btn-warn{background:var(--warn);border-color:var(--warn)}
+[hidden]{display:none!important}
+.registro select,.registro textarea,.registro input:not([type=checkbox]):not([type=radio]){font:inherit;font-size:1rem;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg);width:100%;box-sizing:border-box}
+.registro select:focus-visible,.registro input:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
+.lugar-info{background:var(--accent-soft);border-radius:10px;padding:12px 14px;display:grid;gap:4px}
+.lugar-info strong{font-family:var(--display)}
+.registro{display:grid;gap:10px}
+.botones{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{display:block;text-align:center;padding:13px 10px;border-radius:10px;background:var(--accent);color:var(--bg);font-weight:700;text-decoration:none;border:2px solid var(--accent)}
+.btn-alt{background:transparent;color:var(--accent)}
+.btn[aria-disabled="true"]{opacity:.45;pointer-events:none}
+.btn:focus-visible{outline:3px solid var(--fg);outline-offset:2px}
+footer{color:var(--muted);font-size:.85rem;border-top:1px solid var(--line);padding-top:14px}
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Predicación pública</span>
+    <h1>Carrito de publicaciones</h1>
+    <p class="lead">Gracias por usar el carrito. Lee estas indicaciones antes de empezar tu turno.</p>
+  </header>
+
+  <aside class="porque">
+    <strong>¿Por qué este aviso?</strong>
+    <p>Los turnos y los asignados siguen en Hourglass, pero Hourglass no registra cuándo se recoge el carrito, dónde estuvo ni cuándo se devuelve. Sin eso perdemos la cadena de custodia: si aparece dañado o le faltan publicaciones, no sabemos quién lo tuvo por última vez. Este aviso toma menos de un minuto y lo complementa; no reemplaza a Hourglass.</p>
+  </aside>
+
+  <nav class="tabs" id="tabs" aria-label="Elegir carrito"></nav>
+
+  <div class="ficha" id="ficha"></div>
+
+  <section class="registro" aria-labelledby="reg-t">
+    <h2 id="reg-t"><span class="icon"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg></span>Avisar al recoger y al devolver</h2>
+    <p class="lead">Escribe tu nombre, elige si recoges o devuelves y envía el aviso a José y a Eliezer. Se abre WhatsApp con el mensaje listo; solo tienes que enviarlo.</p>
+    <label for="nombre" class="eyebrow">Tu nombre</label>
+    <input id="nombre" type="text" autocomplete="name" placeholder="Nombre y apellido">
+    <fieldset class="seg">
+      <legend class="eyebrow">¿Qué vas a hacer?</legend>
+      <input type="radio" name="accion" id="acc-recojo" value="recojo" checked><label for="acc-recojo">Lo recojo</label>
+      <input type="radio" name="accion" id="acc-devuelvo" value="devuelvo"><label for="acc-devuelvo">Lo devuelvo</label>
+    </fieldset>
+    <div id="solo-recojo" class="grupo">
+      <label for="lugar" class="eyebrow">¿Dónde vas a estar?</label>
+      <select id="lugar"></select>
+      <input id="lugar-otro" type="text" placeholder="Escribe el lugar" hidden>
+      <div id="lugar-info" class="lugar-info" hidden></div>
+    </div>
+    <div id="solo-devuelvo" class="grupo" hidden>
+      <fieldset class="checks">
+        <legend class="eyebrow">Revisión antes de dejarlo</legend>
+        <label><input type="checkbox" class="chk" id="chk-deposito" value="En el depósito"> Quedó guardado en el depósito</label>
+        <label><input type="checkbox" class="chk" id="chk-cubierto" value="Cubierto"> Quedó cubierto</label>
+        <label><input type="checkbox" class="chk" id="chk-limpio" value="Limpio"> Está limpio</label>
+        <label><input type="checkbox" class="chk" id="chk-ruedas" value="Ruedas y estructura"> Ruedas y estructura en buen estado</label>
+        <label><input type="checkbox" class="chk" id="chk-pubs" value="Publicaciones ordenadas"> Publicaciones secas y ordenadas</label>
+      </fieldset>
+      <label for="faltan" class="eyebrow">Publicaciones que faltan o se acabaron</label>
+      <input id="faltan" type="text" placeholder="Déjalo vacío si no falta nada">
+    </div>
+    <span class="eyebrow">Enviar aviso por WhatsApp (toca los dos)</span>
+    <p id="aviso-falta" class="pend" hidden></p>
+    <div id="aviso-btns" class="botones"></div>
+    <p id="reg-aviso" class="pend" hidden></p>
+  </section>
+
+  <section class="registro reporte" aria-labelledby="rep-t">
+    <h2 id="rep-t"><span class="icon"><svg viewBox="0 0 24 24"><path d="M12 3l9 16H3zM12 10v4M12 17h.01"/></svg></span>Reportar un problema</h2>
+    <p class="lead">Si algo está roto, sucio sin poder limpiarlo o falta material, avísalo aquí. Usa el nombre que escribiste arriba.</p>
+    <label for="prob-tipo" class="eyebrow">Tipo de problema</label>
+    <select id="prob-tipo">
+      <option value="">Elige uno</option>
+      <option>Ruedas o estructura</option>
+      <option>Letrero o bandejas</option>
+      <option>Cubierta para lluvia</option>
+      <option>Publicaciones dañadas</option>
+      <option>Faltan publicaciones</option>
+      <option>Muy sucio</option>
+      <option>Otro</option>
+    </select>
+    <label for="prob-det" class="eyebrow">Detalles</label>
+    <textarea id="prob-det" rows="3" placeholder="Qué pasó y qué tan urgente es"></textarea>
+    <span class="eyebrow">Enviar el reporte a</span>
+    <div id="prob-btns" class="prob-btns"></div>
+    <p id="prob-aviso" class="pend" hidden></p>
+  </section>
+
+  <section>
+    <h2><span class="icon"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M14.5 20c.3-2.6 1.6-4.5 4-4.5 2.2 0 3.5 1.8 3.5 4.5"/></svg></span>Durante el turno</h2>
+    <ul>
+      <li>Salgan siempre en pareja y lleguen a la hora asignada.</li>
+      <li>Nunca dejen el carrito solo. Si hay que moverse, el carrito va con ustedes.</li>
+      <li>Colóquense al lado del carrito, sin bloquear el paso de peatones, entradas ni rampas.</li>
+      <li>Dejen que las personas se acerquen. Pueden saludar con amabilidad, pero sin detener a nadie ni presionar.</li>
+      <li>Ofrezcan publicaciones solo si la persona se acerca, muestra interés o hace alguna pregunta.</li>
+      <li>Usen solo las publicaciones del carrito y sigan las indicaciones de los ancianos.</li>
+      <li>Si alguien pide una visita o un estudio, anoten los datos y entréguenlos según lo acordado.</li>
+      <li>Presentación sencilla y modesta. Eviten conversaciones largas entre ustedes que distraigan.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="icon"><svg viewBox="0 0 24 24"><path d="M4 5h6a2 2 0 0 1 2 2v13a2 2 0 0 0-2-2H4zM20 5h-6a2 2 0 0 0-2 2v13a2 2 0 0 1 2-2h6z"/></svg></span>Cuidado de las publicaciones</h2>
+    <ul>
+      <li>Manténganlas secas: con lluvia o rocío, cubran el carrito o guárdenlas.</li>
+      <li>No las dejen al sol directo por mucho tiempo; se decoloran y se doblan.</li>
+      <li>Colóquenlas derechas y ordenadas, con las portadas a la vista.</li>
+      <li>Retiren las que estén rotas, mojadas o manchadas y repónganlas con ejemplares en buen estado.</li>
+      <li>Si se está acabando alguna, avisen al responsable para reponerla.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="icon"><svg viewBox="0 0 24 24"><path d="M4 20h16M7 20l2-9h6l2 9M10 11V5a2 2 0 0 1 4 0v6"/></svg></span>Limpieza</h2>
+    <ul>
+      <li>Si ven el carrito sucio, límpienlo antes o después de su turno.</li>
+      <li>Usen un paño húmedo y jabón suave en el marco, el letrero y las bandejas. Séquenlo bien.</li>
+      <li>No usen productos abrasivos ni mojen las publicaciones.</li>
+      <li>Revisen las ruedas: quiten hojas, tierra o cabellos enredados.</li>
+      <li>Si algo está roto o flojo, no lo usen así; avisen al responsable.</li>
+    </ul>
+  </section>
+
+  <section class="devolver">
+    <h2><span class="icon"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7M5 10v10h14V10M10 20v-5h4v5"/></svg></span>Al terminar</h2>
+    <ul>
+      <li>Devuelvan el carrito al depósito indicado arriba, el mismo día.</li>
+      <li>Déjenlo cubierto, limpio y con las publicaciones ordenadas para el próximo turno.</li>
+      <li>Si no pueden devolverlo, comuníquense con el responsable antes de irse.</li>
+    </ul>
+  </section>
+
+  <footer>Indicaciones locales para el uso del carrito. Ante cualquier duda, consulten al responsable que aparece en la ficha.</footer>
+</div>
+
+<script>
+// Escanear el QR abre la página en #carrito-N. Los carritos no tienen lugar fijo:
+// la persona elige la localidad al recogerlo.
+const TOTAL_CARRITOS = 8;
+const CARRITOS = Array.from({length: TOTAL_CARRITOS}, (_, i) => ({id: `carrito-${i+1}`, nombre: `Carrito ${i+1}`}));
+
+// Datos comunes a todos los carritos
+const GENERAL = {deposito:"Salón del Reino de Mariolga (Urb. Mariolga, esquina San Carlos y San Antonio)", depositoMapa:"https://www.google.com/maps/search/?api=1&query=Sal%C3%B3n%20del%20Reino%20Mariolga%20Caguas&query_place_id=ChIJj_-YyddaA4wRUSbd0M-hh5M", responsable:"José Marcano y Eliezer Hernández", contacto:"José: (939) 344-0132 · Eliezer: (787) 421-3967"};
+
+// Quienes reciben los avisos de recogido y devuelto
+const AVISOS_A = [
+  {nombre:"José Marcano", whatsapp:"19393440132"},
+  {nombre:"Eliezer Hernández", whatsapp:"17874213967"}
+];
+
+// Quienes reciben los reportes de problemas
+const PROBLEMAS_A = [
+  {nombre:"José Marcano", whatsapp:"19393440132"},
+  {nombre:"Eliezer Hernández", whatsapp:"17874213967"}
+];
+
+// Localidades donde se puede colocar un carrito
+const LUGARES = [
+  {nombre:"Correo USPS – Ave. Gautier Benítez", descripcion:"Correo principal (225 Ave. José Gautier Benítez). Bajo el techo en voladizo de la entrada, protegido del sol y la lluvia.", mapa:"https://maps.app.goo.gl/bWdVKEg2J5co6qAS7"},
+  {nombre:"Correo USPS Pueblo – Calle Muñoz Rivera", descripcion:"Al lado del edificio del correo por la calle Muñoz Rivera, junto al Estacionamiento Lincoln Center Plaza, poco antes de la esquina con la calle Dr. Goyco.", mapa:"https://maps.app.goo.gl/RLVFUVYr7MUoCQ2W7"},
+  {nombre:"Correo USPS Pueblo – Calle Dr. Goyco", descripcion:"En la acera del correo por la calle Dr. Goyco, entre la esquina con la calle Muñoz Rivera y la calle D. La Panadería La Asturiana queda en esa misma calle.", mapa:"https://maps.app.goo.gl/yP1KDtupNvuy31YKA"},
+  {nombre:"NUC", descripcion:"En la parte de atrás de NUC (Northbridge University – Caguas), en la acera de la calle de atrás, cerca de la esquina con la calle Ensueños.", mapa:"https://www.google.com/maps/search/?api=1&query=18.223750,-66.039778"},
+  {nombre:"Planet Fitness", descripcion:"En la acera de la calle Gautier Benítez (carretera 183), en la entrada del estacionamiento cerca de la esquina con el Paseo José Gautier Benítez, junto a la caseta del guardia.", mapa:"https://maps.app.goo.gl/kzGgVt5zHivd72Dn7"},
+  {nombre:"Plaza Pública – Centro", descripcion:"En el medio de la Plaza Pública Santiago R. Palmer.", mapa:"https://www.google.com/maps/search/?api=1&query=Plaza%20P%C3%BAblica%20Santiago%20R.%20Palmer&query_place_id=ChIJ3w7VXDdbA4wRtcj1etZEDd8"},
+  {nombre:"Plaza Pública – Esquina", descripcion:"En la esquina de la plaza del lado de la calle principal (carretera 1), mirando hacia CIMATEC.", mapa:"https://maps.app.goo.gl/gJwd9z2qsa7vm7B46"}
+  // Para añadir detalles: {nombre:"...", descripcion:"Dónde colocarse", horario:"Lun–Sáb, 8:00–12:00"}
+];
+
+const PEND = '<span class="pend">Por completar</span>';
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const val = v => v ? esc(v) : PEND;
+
+let actual = CARRITOS[0];
+const inp = document.getElementById("nombre");
+const sel = document.getElementById("lugar");
+const otro = document.getElementById("lugar-otro");
+const info = document.getElementById("lugar-info");
+const faltan = document.getElementById("faltan");
+const checks = [...document.querySelectorAll(".chk")];
+for (const c of checks) c.addEventListener("change", () => enlaces());
+const tipo = document.getElementById("prob-tipo");
+const det = document.getElementById("prob-det");
+
+sel.innerHTML = '<option value="">Elige una localidad</option>' +
+  LUGARES.map((l, i) => `<option value="${i}">${esc(l.nombre)}</option>`).join("") +
+  '<option value="otro">Otro lugar</option>';
+try { inp.value = localStorage.getItem("nombre") || ""; } catch (e) {}
+document.getElementById("aviso-btns").innerHTML = AVISOS_A.map((p, i) =>
+  `<a id="btn-aviso-${i}" class="btn" target="_blank" rel="noopener">Enviar a ${esc(p.nombre.split(" ")[0])}</a>`).join("");
+document.getElementById("prob-btns").innerHTML = PROBLEMAS_A.map((p, i) =>
+  `<a id="btn-prob-${i}" class="btn btn-warn" target="_blank" rel="noopener">${esc(p.nombre)}</a>`).join("");
+
+function desdeHash(){
+  const h = (location.hash || "").slice(1);
+  return CARRITOS.find(x => x.id === h);
+}
+actual = desdeHash() || CARRITOS[0];
+function elegir(id){
+  actual = CARRITOS.find(x => x.id === id) || actual;
+  render();
+}
+function render(){
+  const tabs = document.getElementById("tabs");
+  tabs.innerHTML = CARRITOS.map(x =>
+    `<button type="button" data-id="${x.id}" aria-pressed="${x.id === actual.id}" aria-label="${esc(x.nombre)}">${esc(x.nombre.replace("Carrito ",""))}</button>`).join("");
+  document.getElementById("ficha").innerHTML = `
+    <div><span class="eyebrow">Este carrito</span><div class="num">${esc(actual.nombre)}</div></div>
+    <dl>
+      <dt>Depósito</dt><dd>${val(GENERAL.deposito)}${GENERAL.depositoMapa ? ` · <a href="${esc(GENERAL.depositoMapa)}" target="_blank" rel="noopener">Ver en el mapa</a>` : ""}</dd>
+      <dt>Responsable</dt><dd>${val(GENERAL.responsable)}</dd>
+      <dt>Contacto</dt><dd>${val(GENERAL.contacto)}</dd>
+    </dl>`;
+  enlaces();
+}
+
+function lugarElegido(){
+  if (sel.value === "otro") return otro.value.trim();
+  if (sel.value === "") return "";
+  return LUGARES[+sel.value].nombre;
+}
+function mostrarLugar(){
+  otro.hidden = sel.value !== "otro";
+  const l = (sel.value !== "" && sel.value !== "otro") ? LUGARES[+sel.value] : null;
+  info.hidden = !l;
+  if (l) info.innerHTML = `<strong>${esc(l.nombre)}</strong>` +
+    (l.descripcion ? `<span>${esc(l.descripcion)}</span>` : "") +
+    (l.horario ? `<span class="eyebrow">Horario: ${esc(l.horario)}</span>` : "") +
+    (l.mapa ? `<a href="${esc(l.mapa)}" target="_blank" rel="noopener">Ver en el mapa</a>` : "");
+}
+
+function hora(){
+  return new Date().toLocaleString("es-PR", {weekday:"long", day:"numeric", month:"long", hour:"numeric", minute:"2-digit"});
+}
+const accion = () => document.querySelector('input[name="accion"]:checked').value;
+const limpio = v => (v || "").replace(/\D/g, "");
+function enlazar(a, listo, txt, num){
+  if (listo) {
+    a.href = `https://wa.me/${num}?text=${encodeURIComponent(txt)}`;
+    a.removeAttribute("aria-disabled");
+  } else {
+    a.removeAttribute("href");
+    a.setAttribute("aria-disabled", "true");
+  }
+}
+function faltanNum(lista, el){
+  const sin = lista.filter(p => !p.whatsapp).map(p => p.nombre);
+  el.hidden = !sin.length;
+  if (sin.length) el.textContent = "Falta el WhatsApp de: " + sin.join(", ") + ".";
+}
+function enlaces(){
+  const n = inp.value.trim();
+  const recojo = accion() === "recojo";
+  document.getElementById("solo-recojo").hidden = !recojo;
+  document.getElementById("solo-devuelvo").hidden = recojo;
+  const lugar = lugarElegido();
+  const txt = recojo
+    ? `${actual.nombre}: ${n} lo recogió para ${lugar} — ${hora()}`
+    : `${actual.nombre}: ${n} lo devolvió — ${hora()}\n` +
+      checks.map(c => `${c.value} ${c.checked ? "✓" : "✗"}`).join(" · ") +
+      (checks.every(c => c.checked) ? "" : "\n⚠️ Revisar lo marcado con ✗.") +
+      (faltan.value.trim() ? `\nFalta o se acabó: ${faltan.value.trim()}` : "\nNo falta ninguna publicación.");
+  const listo = n && (!recojo || lugar);
+  const falta = !n ? (recojo && !lugar ? "Escribe tu nombre y elige dónde vas a estar para activar los botones." : "Escribe tu nombre para activar los botones.")
+    : (recojo && !lugar ? "Elige dónde vas a estar para activar los botones." : "");
+  const fEl = document.getElementById("aviso-falta");
+  fEl.hidden = !falta; fEl.textContent = falta;
+  AVISOS_A.forEach((p, i) => enlazar(document.getElementById(`btn-aviso-${i}`), listo && limpio(p.whatsapp), txt, limpio(p.whatsapp)));
+  faltanNum(AVISOS_A, document.getElementById("reg-aviso"));
+
+  const probTxt = `⚠️ Problema con ${actual.nombre}: ${tipo.value}.` +
+    (det.value.trim() ? `\n${det.value.trim()}` : "") + `\nReporta: ${n} — ${hora()}`;
+  PROBLEMAS_A.forEach((p, i) => enlazar(document.getElementById(`btn-prob-${i}`), n && tipo.value && limpio(p.whatsapp), probTxt, limpio(p.whatsapp)));
+  faltanNum(PROBLEMAS_A, document.getElementById("prob-aviso"));
+}
+
+inp.addEventListener("input", () => {
+  try { localStorage.setItem("nombre", inp.value); } catch (e) {}
+  enlaces();
+});
+sel.addEventListener("change", () => { mostrarLugar(); enlaces(); });
+for (const el of [otro, faltan, det]) el.addEventListener("input", enlaces);
+tipo.addEventListener("change", enlaces);
+for (const r of document.querySelectorAll('input[name="accion"]')) r.addEventListener("change", enlaces);
+// Actualiza la hora del mensaje justo al tocar
+document.addEventListener("pointerdown", e => { if (e.target.closest(".btn")) enlaces(); });
+
+document.getElementById("tabs").addEventListener("click", e => {
+  const b = e.target.closest("button[data-id]");
+  if (b) elegir(b.dataset.id);
+});
+addEventListener("hashchange", () => { const c = desdeHash(); if (c) { actual = c; render(); } });
+mostrarLugar();
+render();
+</script>
