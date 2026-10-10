@@ -50,7 +50,7 @@ ul{margin:0;padding-left:1.2em;display:grid;gap:6px}
 .seg{border:0;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .seg legend{padding:0;margin-bottom:8px}
 .seg input{position:absolute;opacity:0;pointer-events:none}
-.seg label{text-align:center;padding:11px;border-radius:10px;border:2px solid var(--line);font-weight:700;cursor:pointer}
+.seg label{display:flex;align-items:center;justify-content:center;text-align:center;padding:11px;border-radius:10px;border:2px solid var(--line);font-weight:700;cursor:pointer}
 .seg input:checked+label{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
 .seg input:focus-visible+label{outline:3px solid var(--accent);outline-offset:2px}
 .porque{border-left:4px solid var(--accent);padding:4px 0 4px 14px;display:grid;gap:4px}
@@ -90,8 +90,8 @@ footer{color:var(--muted);font-size:.85rem;border-top:1px solid var(--line);padd
 
   <section class="registro" aria-labelledby="reg-t">
     <h2 id="reg-t"><span class="icon"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg></span>Avisar al recoger y al devolver</h2>
-    <p class="lead">Escribe tu nombre, elige si recoges o devuelves y envía el aviso a José y a Eliezer. Se abre WhatsApp con el mensaje listo; solo tienes que enviarlo.</p>
-    <label for="nombre" class="eyebrow">Tu nombre</label>
+    <p class="lead">Escribe tu nombre y apellido, elige si recoges o devuelves y envía el aviso a José Marcano y a Eliezer Hernández. Se abre WhatsApp con el mensaje listo; solo tienes que enviarlo.</p>
+    <label for="nombre" class="eyebrow">Tu nombre y apellido</label>
     <input id="nombre" type="text" autocomplete="name" placeholder="Nombre y apellido">
     <fieldset class="seg">
       <legend class="eyebrow">¿Qué vas a hacer?</legend>
@@ -198,7 +198,7 @@ const TOTAL_CARRITOS = 8;
 const CARRITOS = Array.from({length: TOTAL_CARRITOS}, (_, i) => ({id: `carrito-${i+1}`, nombre: `Carrito ${i+1}`}));
 
 // Datos comunes a todos los carritos
-const GENERAL = {deposito:"Salón del Reino de Mariolga (Urb. Mariolga, esquina San Carlos y San Antonio)", depositoMapa:"https://www.google.com/maps/search/?api=1&query=Sal%C3%B3n%20del%20Reino%20Mariolga%20Caguas&query_place_id=ChIJj_-YyddaA4wRUSbd0M-hh5M", responsable:"José Marcano y Eliezer Hernández", contacto:"José: (939) 344-0132 · Eliezer: (787) 421-3967"};
+const GENERAL = {deposito:"Salón del Reino de Mariolga (Urb. Mariolga, esquina San Carlos y San Antonio)", depositoMapa:"https://www.google.com/maps/search/?api=1&query=Sal%C3%B3n%20del%20Reino%20Mariolga%20Caguas&query_place_id=ChIJj_-YyddaA4wRUSbd0M-hh5M", responsable:"José Marcano y Eliezer Hernández", contacto:"José Marcano: (939) 344-0132 · Eliezer Hernández: (787) 421-3967"};
 
 // Quienes reciben los avisos de recogido y devuelto
 const AVISOS_A = [
@@ -244,7 +244,7 @@ sel.innerHTML = '<option value="">Elige una localidad</option>' +
   '<option value="otro">Otro lugar</option>';
 try { inp.value = localStorage.getItem("nombre") || ""; } catch (e) {}
 document.getElementById("aviso-btns").innerHTML = AVISOS_A.map((p, i) =>
-  `<a id="btn-aviso-${i}" class="btn" target="_blank" rel="noopener">Enviar a ${esc(p.nombre.split(" ")[0])}</a>`).join("");
+  `<a id="btn-aviso-${i}" class="btn" target="_blank" rel="noopener">Enviar a ${esc(p.nombre)}</a>`).join("");
 document.getElementById("prob-btns").innerHTML = PROBLEMAS_A.map((p, i) =>
   `<a id="btn-prob-${i}" class="btn btn-warn" target="_blank" rel="noopener">${esc(p.nombre)}</a>`).join("");
 
@@ -306,7 +306,8 @@ function faltanNum(lista, el){
   if (sin.length) el.textContent = "Falta el WhatsApp de: " + sin.join(", ") + ".";
 }
 function enlaces(){
-  const n = inp.value.trim();
+  const n = inp.value.trim().replace(/\s+/g, " ");
+  const completo = n.split(" ").filter(w => w.length > 1).length >= 2;
   const recojo = accion() === "recojo";
   document.getElementById("solo-recojo").hidden = !recojo;
   document.getElementById("solo-devuelvo").hidden = recojo;
@@ -317,8 +318,8 @@ function enlaces(){
       checks.map(c => `${c.value} ${c.checked ? "✓" : "✗"}`).join(" · ") +
       (checks.every(c => c.checked) ? "" : "\n⚠️ Revisar lo marcado con ✗.") +
       (faltan.value.trim() ? `\nFalta o se acabó: ${faltan.value.trim()}` : "\nNo falta ninguna publicación.");
-  const listo = n && (!recojo || lugar);
-  const falta = !n ? (recojo && !lugar ? "Escribe tu nombre y elige dónde vas a estar para activar los botones." : "Escribe tu nombre para activar los botones.")
+  const listo = completo && (!recojo || lugar);
+  const falta = !completo ? (recojo && !lugar ? "Escribe tu nombre y apellido, y elige dónde vas a estar, para activar los botones." : "Escribe tu nombre y apellido para activar los botones.")
     : (recojo && !lugar ? "Elige dónde vas a estar para activar los botones." : "");
   const fEl = document.getElementById("aviso-falta");
   fEl.hidden = !falta; fEl.textContent = falta;
@@ -327,7 +328,7 @@ function enlaces(){
 
   const probTxt = `⚠️ Problema con ${actual.nombre}: ${tipo.value}.` +
     (det.value.trim() ? `\n${det.value.trim()}` : "") + `\nReporta: ${n} — ${hora()}`;
-  PROBLEMAS_A.forEach((p, i) => enlazar(document.getElementById(`btn-prob-${i}`), n && tipo.value && limpio(p.whatsapp), probTxt, limpio(p.whatsapp)));
+  PROBLEMAS_A.forEach((p, i) => enlazar(document.getElementById(`btn-prob-${i}`), completo && tipo.value && limpio(p.whatsapp), probTxt, limpio(p.whatsapp)));
   faltanNum(PROBLEMAS_A, document.getElementById("prob-aviso"));
 }
 
