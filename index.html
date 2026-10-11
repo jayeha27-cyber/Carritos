@@ -72,6 +72,13 @@ ul{margin:0;padding-left:1.2em;display:grid;gap:6px}
 .porque{border-left:4px solid var(--accent);padding:4px 0 4px 14px;display:grid;gap:4px}
 .porque p{margin:0;color:var(--muted)}
 .prob-btns{display:grid;gap:8px}
+button.btn{font:inherit;font-weight:700;width:100%;cursor:pointer}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.estado{margin:0;padding:10px 12px;border-radius:10px;font-weight:700}
+.estado.ok{background:var(--accent-soft);color:var(--accent)}
+.estado.err{background:var(--warn-soft);color:var(--warn)}
+.respaldo summary{cursor:pointer;color:var(--muted);font-size:.92rem;padding:4px 0}
+.respaldo[open]{display:grid;gap:10px}
 .registro textarea{resize:vertical}
 .btn-warn{background:var(--warn);border-color:var(--warn)}
 [hidden]{display:none!important}
@@ -109,7 +116,7 @@ footer{color:var(--muted);font-size:.85rem;border-top:1px solid var(--line);padd
 
   <section class="registro" aria-labelledby="reg-t">
     <h2 id="reg-t"><span class="icon"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg></span>Avisar al recoger y al devolver</h2>
-    <p class="lead">Escribe tu nombre y apellido, elige si recoges o devuelves y envía el aviso a José Marcano y a Eliezer Hernández. Se abre WhatsApp con el mensaje listo; solo tienes que enviarlo.</p>
+    <p class="lead">Escribe tu nombre y apellido, elige si recoges o devuelves el carrito y toca «Enviar aviso». Les llega a José Marcano y a Eliezer Hernández, y queda guardado en el registro.</p>
     <label for="nombre" class="eyebrow">Tu nombre y apellido</label>
     <input id="nombre" type="text" autocomplete="name" placeholder="Nombre y apellido">
     <fieldset class="seg">
@@ -135,15 +142,19 @@ footer{color:var(--muted);font-size:.85rem;border-top:1px solid var(--line);padd
       <label for="faltan" class="eyebrow">Publicaciones que faltan o se acabaron</label>
       <input id="faltan" type="text" placeholder="Déjalo vacío si no falta nada">
     </div>
-    <span class="eyebrow">Enviar aviso por WhatsApp (toca los dos)</span>
     <p id="aviso-falta" class="pend" hidden></p>
-    <div id="aviso-btns" class="botones"></div>
-    <p id="reg-aviso" class="pend" hidden></p>
+    <button type="button" id="btn-enviar" class="btn">Enviar aviso</button>
+    <p id="envio-estado" class="estado" role="status" hidden></p>
+    <details class="respaldo" id="resp-aviso">
+      <summary>¿No se envió? Avisar por WhatsApp</summary>
+      <div id="aviso-btns" class="botones"></div>
+      <p id="reg-aviso" class="pend" hidden></p>
+    </details>
   </section>
 
   <section class="registro reporte" aria-labelledby="rep-t">
     <h2 id="rep-t"><span class="icon"><svg viewBox="0 0 24 24"><path d="M12 3l9 16H3zM12 10v4M12 17h.01"/></svg></span>Reportar un problema</h2>
-    <p class="lead">Si algo está roto, sucio sin poder limpiarlo o falta material, avísalo aquí. Usa el nombre que escribiste arriba.</p>
+    <p class="lead">Si algo está roto, sucio sin poder limpiarlo o falta material, repórtalo aquí. Usa el nombre que escribiste arriba.</p>
     <label for="prob-tipo" class="eyebrow">Tipo de problema</label>
     <select id="prob-tipo">
       <option value="">Elige uno</option>
@@ -157,9 +168,13 @@ footer{color:var(--muted);font-size:.85rem;border-top:1px solid var(--line);padd
     </select>
     <label for="prob-det" class="eyebrow">Detalles</label>
     <textarea id="prob-det" rows="3" placeholder="Qué pasó y qué tan urgente es"></textarea>
-    <span class="eyebrow">Enviar el reporte a</span>
-    <div id="prob-btns" class="prob-btns"></div>
-    <p id="prob-aviso" class="pend" hidden></p>
+    <button type="button" id="btn-enviar-prob" class="btn btn-warn">Enviar reporte</button>
+    <p id="prob-estado" class="estado" role="status" hidden></p>
+    <details class="respaldo" id="resp-prob">
+      <summary>¿No se envió? Reportar por WhatsApp</summary>
+      <div id="prob-btns" class="prob-btns"></div>
+      <p id="prob-aviso" class="pend" hidden></p>
+    </details>
   </section>
 
   <section>
@@ -324,9 +339,32 @@ function faltanNum(lista, el){
   el.hidden = !sin.length;
   if (sin.length) el.textContent = "Falta el WhatsApp de: " + sin.join(", ") + ".";
 }
+const ENDPOINT = "https://script.google.com/macros/s/AKfycbzD07MwyrCzuyYK26p9D5lnawAAJeFNdFnr2T-WT5WgZWy95TRWvXMVb6lsMfyKSNDn2w/exec";
+let enviando = false;
+function nombreLimpio(){ return inp.value.trim().replace(/\s+/g, " "); }
+function nombreCompleto(n){ return n.split(" ").filter(w => w.length > 1).length >= 2; }
+async function enviar(datos, boton, estado, respaldo, textoOk, alTerminar){
+  enviando = true;
+  const original = boton.textContent;
+  boton.disabled = true; boton.textContent = "Enviando…"; estado.hidden = true;
+  try {
+    const r = await fetch(ENDPOINT, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(datos) });
+    const j = await r.json();
+    if (!j.ok) throw new Error(j.error || "error");
+    estado.className = "estado ok"; estado.textContent = textoOk; estado.hidden = false;
+    boton.textContent = "Enviado ✓";
+    if (alTerminar) alTerminar();
+    setTimeout(() => { enviando = false; boton.textContent = original; enlaces(); }, 4000);
+  } catch (e) {
+    estado.className = "estado err";
+    estado.textContent = "No se pudo enviar. Revisa la conexión y vuelve a intentarlo, o avisa por WhatsApp aquí abajo.";
+    estado.hidden = false; respaldo.open = true;
+    enviando = false; boton.textContent = original; enlaces();
+  }
+}
 function enlaces(){
-  const n = inp.value.trim().replace(/\s+/g, " ");
-  const completo = n.split(" ").filter(w => w.length > 1).length >= 2;
+  const n = nombreLimpio();
+  const completo = nombreCompleto(n);
   const recojo = accion() === "recojo";
   document.getElementById("solo-recojo").hidden = !recojo;
   document.getElementById("solo-devuelvo").hidden = recojo;
@@ -342,6 +380,10 @@ function enlaces(){
     : (recojo && !lugar ? "Elige dónde vas a estar para activar los botones." : "");
   const fEl = document.getElementById("aviso-falta");
   fEl.hidden = !falta; fEl.textContent = falta;
+  if (!enviando) {
+    document.getElementById("btn-enviar").disabled = !listo;
+    document.getElementById("btn-enviar-prob").disabled = !(completo && tipo.value);
+  }
   AVISOS_A.forEach((p, i) => enlazar(document.getElementById(`btn-aviso-${i}`), listo && limpio(p.whatsapp), txt, limpio(p.whatsapp)));
   faltanNum(AVISOS_A, document.getElementById("reg-aviso"));
 
@@ -359,6 +401,27 @@ sel.addEventListener("change", () => { mostrarLugar(); enlaces(); });
 for (const el of [otro, faltan, det]) el.addEventListener("input", enlaces);
 tipo.addEventListener("change", enlaces);
 for (const r of document.querySelectorAll('input[name="accion"]')) r.addEventListener("change", enlaces);
+document.getElementById("btn-enviar").addEventListener("click", () => {
+  const n = nombreLimpio(); if (!nombreCompleto(n)) return;
+  const recojo = accion() === "recojo";
+  const datos = recojo
+    ? { tipo: "Recogido", carrito: actual.nombre, nombre: n, localidad: lugarElegido() }
+    : { tipo: "Devuelto", carrito: actual.nombre, nombre: n,
+        revision: checks.map(c => `${c.value} ${c.checked ? "✓" : "✗"}`).join(" · "),
+        pendientes: checks.filter(c => !c.checked).map(c => c.value).join(", "),
+        faltan: faltan.value.trim() };
+  enviar(datos, document.getElementById("btn-enviar"), document.getElementById("envio-estado"),
+    document.getElementById("resp-aviso"),
+    `Aviso enviado: ${actual.nombre} ${recojo ? "recogido" : "devuelto"}. Gracias.`,
+    () => { if (!recojo) { checks.forEach(c => c.checked = false); faltan.value = ""; } });
+});
+document.getElementById("btn-enviar-prob").addEventListener("click", () => {
+  const n = nombreLimpio(); if (!nombreCompleto(n) || !tipo.value) return;
+  enviar({ tipo: "Problema", carrito: actual.nombre, nombre: n, problema: tipo.value, detalles: det.value.trim() },
+    document.getElementById("btn-enviar-prob"), document.getElementById("prob-estado"),
+    document.getElementById("resp-prob"), "Reporte enviado. Gracias por avisar.",
+    () => { tipo.value = ""; det.value = ""; });
+});
 // Actualiza la hora del mensaje justo al tocar
 document.addEventListener("pointerdown", e => { if (e.target.closest(".btn")) enlaces(); });
 
