@@ -1,3 +1,8 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Carrito de Publicaciones</title>
 <meta name="apple-mobile-web-app-title" content="Carritos">
 <meta name="theme-color" content="#1f5f8b">
@@ -20,7 +25,12 @@
 :root[data-theme="dark"]{
   --bg:#11171e; --surface:#1a222c; --fg:#e7edf3; --muted:#9aa8b6; --line:#2c3846;
   --accent:#7fb6dc; --accent-soft:#1d3142; --warn:#e9a46b; --warn-soft:#3a2a1c; color-scheme:dark}
-body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.55}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+*,*::before,*::after{box-sizing:border-box}
+img{max-width:100%}
+[hidden]{display:none!important}
+a{color:var(--accent)}
+body{margin:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.55}
 .wrap{max-width:640px;margin:0 auto;padding:28px 16px 48px;display:grid;gap:22px}
 h1,h2{font-family:var(--display);text-wrap:balance;margin:0}
 h1{font-size:2rem;font-weight:800;line-height:1.1}
@@ -28,14 +38,15 @@ h2{font-size:1.2rem;font-weight:600;display:flex;align-items:center;gap:10px}
 .eyebrow{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
 header{display:grid;gap:6px}
 .lead{color:var(--muted);margin:0}
-.tabs{display:flex;flex-wrap:wrap;gap:8px}
-.tabs button{font:inherit;cursor:pointer;padding:6px 14px;border-radius:999px;border:1px solid var(--line);color:var(--fg);text-decoration:none;font-weight:700;font-size:.92rem;background:var(--surface)}
+.tabs{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px}
+.tabs button{font:inherit;cursor:pointer;padding:9px 0;text-align:center;min-width:0;border-radius:999px;border:1px solid var(--line);color:var(--fg);text-decoration:none;font-weight:700;font-size:.92rem;background:var(--surface)}
 .tabs button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--bg)}
 .tabs button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .ficha{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:14px}
 .ficha dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:10px 16px}
 .ficha dt{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;padding-top:3px}
 .ficha dd{margin:0;min-width:0}
+@media (max-width:540px){.ficha dl{grid-template-columns:1fr;gap:2px}.ficha dd{margin-bottom:12px}.ficha dd:last-child{margin-bottom:0}}
 .pend{color:var(--warn);font-style:italic}
 .num{font-family:var(--display);font-size:1.5rem;font-weight:800;color:var(--accent)}
 section{display:grid;gap:10px}
@@ -77,6 +88,8 @@ ul{margin:0;padding-left:1.2em;display:grid;gap:6px}
 footer{color:var(--muted);font-size:.85rem;border-top:1px solid var(--line);padding-top:14px}
 </style>
 
+</head>
+<body>
 <div class="wrap">
   <header>
     <span class="eyebrow">Predicación pública</span>
@@ -84,14 +97,15 @@ footer{color:var(--muted);font-size:.85rem;border-top:1px solid var(--line);padd
     <p class="lead">Gracias por usar el carrito. Lee estas indicaciones antes de empezar tu turno.</p>
   </header>
 
-  <aside class="porque">
-    <strong>¿Por qué este aviso?</strong>
-    <p>Los turnos y los asignados siguen en Hourglass, pero Hourglass no registra cuándo se recoge el carrito, dónde estuvo ni cuándo se devuelve. Sin eso perdemos la cadena de custodia: si aparece dañado o le faltan publicaciones, no sabemos quién lo tuvo por última vez. Este aviso toma menos de un minuto y lo complementa; no reemplaza a Hourglass.</p>
-  </aside>
 
   <nav class="tabs" id="tabs" aria-label="Elegir carrito"></nav>
 
   <div class="ficha" id="ficha"></div>
+
+  <aside class="porque">
+    <strong>¿Por qué este aviso?</strong>
+    <p>Los turnos y los asignados siguen en Hourglass, pero Hourglass no registra cuándo se recoge el carrito, dónde estuvo ni cuándo se devuelve. Sin eso perdemos la cadena de custodia: si aparece dañado o le faltan publicaciones, no sabemos quién lo tuvo por última vez. Este aviso toma menos de un minuto y lo complementa; no reemplaza a Hourglass.</p>
+  </aside>
 
   <section class="registro" aria-labelledby="reg-t">
     <h2 id="reg-t"><span class="icon"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg></span>Avisar al recoger y al devolver</h2>
@@ -203,7 +217,7 @@ const TOTAL_CARRITOS = 8;
 const CARRITOS = Array.from({length: TOTAL_CARRITOS}, (_, i) => ({id: `carrito-${i+1}`, nombre: `Carrito ${i+1}`}));
 
 // Datos comunes a todos los carritos
-const GENERAL = {deposito:"Salón del Reino de Mariolga (Urb. Mariolga, esquina San Carlos y San Antonio)", depositoMapa:"https://www.google.com/maps/search/?api=1&query=Sal%C3%B3n%20del%20Reino%20Mariolga%20Caguas&query_place_id=ChIJj_-YyddaA4wRUSbd0M-hh5M", responsable:"José Marcano y Eliezer Hernández", contacto:"José Marcano: (939) 344-0132 · Eliezer Hernández: (787) 421-3967"};
+const GENERAL = {deposito:"Salón del Reino de Mariolga (Urb. Mariolga, esquina San Carlos y San Antonio)", depositoMapa:"https://www.google.com/maps/search/?api=1&query=Sal%C3%B3n%20del%20Reino%20Mariolga%20Caguas&query_place_id=ChIJj_-YyddaA4wRUSbd0M-hh5M", responsable:"José Marcano<br>Eliezer Hernández", contacto:["José Marcano · (939) 344-0132","Eliezer Hernández · (787) 421-3967"]};
 
 // Quienes reciben los avisos de recogido y devuelto
 const AVISOS_A = [
@@ -270,8 +284,8 @@ function render(){
     <div><span class="eyebrow">Este carrito</span><div class="num">${esc(actual.nombre)}</div></div>
     <dl>
       <dt>Depósito</dt><dd>${val(GENERAL.deposito)}${GENERAL.depositoMapa ? ` · <a href="${esc(GENERAL.depositoMapa)}" target="_blank" rel="noopener">Ver en el mapa</a>` : ""}</dd>
-      <dt>Responsable</dt><dd>${val(GENERAL.responsable)}</dd>
-      <dt>Contacto</dt><dd>${val(GENERAL.contacto)}</dd>
+      <dt>Responsables</dt><dd>${GENERAL.responsable}</dd>
+      <dt>Contacto</dt><dd>${GENERAL.contacto.map(esc).join("<br>")}</dd>
     </dl>`;
   enlaces();
 }
@@ -356,3 +370,5 @@ addEventListener("hashchange", () => { const c = desdeHash(); if (c) { actual = 
 mostrarLugar();
 render();
 </script>
+</body>
+</html>
