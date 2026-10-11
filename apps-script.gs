@@ -29,7 +29,7 @@ function doPost(e) {
       return salida_({ ok: false, error: 'Datos incompletos' });
     }
     const fila = [
-      Utilities.formatDate(new Date(), ZONA, 'yyyy-MM-dd HH:mm'),
+      fecha_(new Date()),
       carrito, tipo, nombre,
       t_(d.localidad, 120), t_(d.revision, 300), t_(d.pendientes, 300),
       t_(d.faltan, 300), t_(d.problema, 80), t_(d.detalles, 1000)
@@ -49,6 +49,13 @@ function doPost(e) {
   } finally {
     lock.releaseLock();
   }
+}
+
+function fecha_(d) {
+  const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  const f = k => Utilities.formatDate(d, ZONA, k);
+  const ampm = f('a') === 'AM' ? 'a. m.' : 'p. m.';
+  return f('d') + ' ' + meses[Number(f('M')) - 1] + ' ' + f('yyyy') + ', ' + f('h:mm') + ' ' + ampm;
 }
 
 function hojaAvisos_(ss) {
