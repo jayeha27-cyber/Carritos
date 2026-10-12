@@ -1,14 +1,13 @@
 // Carritos de publicaciones: recibe los avisos de la página, los guarda en esta hoja
 // y envía un correo a las direcciones de la pestaña "Correos".
 // Si un carrito lleva más de 24 horas fuera, pinta la fila de rojo y avisa por correo
-// a los responsables y, si dejó su correo, a la persona que lo tiene.
+// a los responsables, con el contacto de la persona para que la llamen o le escriban.
 const ZONA = 'America/Puerto_Rico';
 const HORAS_LIMITE = 24;
 const ENCABEZADOS = ['Fecha y hora', 'Carrito', 'Tipo', 'Nombre', 'Localidad', 'Revisión',
   'Pendientes en la revisión', 'Faltan publicaciones', 'Problema', 'Detalles',
   'Estado', 'Marca de tiempo', 'Contacto'];
 const C_TIPO = 3, C_CARRITO = 2, C_ESTADO = 11, C_MARCA = 12, C_CONTACTO = 13;
-const RESPONSABLES = 'José Marcano (939) 344-0132 o Eliezer Hernández (787) 421-3967';
 const FUERA = 'Fuera', TARDE = '⚠️ Más de 24 h';
 const ROJO = '#f4c7c3', VERDE = '#d9ead3';
 const VERBO = { Recogido: 'recogido por', Devuelto: 'devuelto por', Problema: 'problema reportado por' };
@@ -106,23 +105,19 @@ function revisarPendientes() {
 
     const carrito = r[1], nombre = String(r[3]), lugar = r[4], cuando = r[0];
     const contacto = String(r[C_CONTACTO - 1] || '').replace(/^'/, '').trim();
-    const recordatorio = 'Hola, ' + nombre.split(' ')[0] + '. Según el registro, el ' + carrito +
-      ' que recogiste el ' + cuando + (lugar ? ' para ' + lugar : '') +
-      ' todavía no aparece como devuelto. Si ya lo devolviste, escanea el QR del carrito y toca' +
-      ' «Lo devuelvo». Si necesitas ayuda, comunícate con ' + RESPONSABLES + '. Gracias.';
     let linea = '• ' + carrito + ': ' + nombre + (lugar ? ' (' + lugar + ')' : '') +
       '. Lo recogió el ' + cuando + ', hace ' + Math.floor(horas) + ' horas.';
-    if (esCorreo_(contacto)) {
-      MailApp.sendEmail(contacto, 'Recordatorio: ' + carrito + ' sin devolver', recordatorio);
-      linea += '\n  Se le envió un recordatorio a ' + contacto + '.';
+    const tel = telefono_(contacto);
+    if (tel) {
+      const msj = 'Hola, ' + nombre.split(' ')[0] + '. El ' + carrito + ' que recogiste el ' + cuando +
+        ' todavía no aparece como devuelto. ¿Podrías devolverlo al Salón del Reino de Mariolga' +
+        ' tan pronto puedas? Si ya lo devolviste, avísanos. Gracias.';
+      linea += '\n  Teléfono: ' + contacto + '\n  Escribirle por WhatsApp: https://wa.me/' + tel +
+        '?text=' + encodeURIComponent(msj);
+    } else if (contacto) {
+      linea += '\n  Contacto: ' + contacto;
     } else {
-      const tel = telefono_(contacto);
-      if (tel) {
-        linea += '\n  Teléfono: ' + contacto + '. Enviarle WhatsApp: https://wa.me/' + tel +
-          '?text=' + encodeURIComponent(recordatorio);
-      } else if (contacto) {
-        linea += '\n  Contacto: ' + contacto;
-      }
+      linea += '\n  No dejó teléfono.';
     }
     tarde.push(linea);
   });
