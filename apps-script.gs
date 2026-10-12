@@ -1,12 +1,14 @@
 // Carritos de publicaciones: recibe los avisos de la página, los guarda en esta hoja
 // y envía un correo a las direcciones de la pestaña "Correos".
-// Si un carrito lleva más de 24 horas fuera, pinta la fila de rojo y avisa por correo.
+// Si un carrito lleva más de 24 horas fuera, pinta la fila de rojo y avisa por correo
+// a los responsables y, si dejó su correo, a la persona que lo tiene.
 const ZONA = 'America/Puerto_Rico';
 const HORAS_LIMITE = 24;
 const ENCABEZADOS = ['Fecha y hora', 'Carrito', 'Tipo', 'Nombre', 'Localidad', 'Revisión',
   'Pendientes en la revisión', 'Faltan publicaciones', 'Problema', 'Detalles',
-  'Estado', 'Marca de tiempo'];
-const C_TIPO = 3, C_CARRITO = 2, C_ESTADO = 11, C_MARCA = 12;
+  'Estado', 'Marca de tiempo', 'Contacto'];
+const C_TIPO = 3, C_CARRITO = 2, C_ESTADO = 11, C_MARCA = 12, C_CONTACTO = 13;
+const RESPONSABLES = 'José Marcano (939) 344-0132 o Eliezer Hernández (787) 421-3967';
 const FUERA = 'Fuera', TARDE = '⚠️ Más de 24 h';
 const ROJO = '#f4c7c3', VERDE = '#d9ead3';
 const VERBO = { Recogido: 'recogido por', Devuelto: 'devuelto por', Problema: 'problema reportado por' };
@@ -48,7 +50,7 @@ function doPost(e) {
       fecha_(ahora), carrito, tipo, nombre,
       t_(d.localidad, 120), t_(d.revision, 300), t_(d.pendientes, 300),
       t_(d.faltan, 300), t_(d.problema, 80), t_(d.detalles, 1000),
-      tipo === 'Recogido' ? FUERA : '', ahora
+      tipo === 'Recogido' ? FUERA : '', ahora, tipo === 'Recogido' ? t_(d.contacto, 80) : ''
     ];
     const ss = SpreadsheetApp.getActive();
     const h = hojaAvisos_(ss);
@@ -101,17 +103,48 @@ function revisarPendientes() {
     if (horas < HORAS_LIMITE) return;
     h.getRange(i + 2, C_ESTADO).setValue(TARDE);
     h.getRange(i + 2, 1, 1, ENCABEZADOS.length).setBackground(ROJO);
-    tarde.push('• ' + r[1] + ': ' + r[3] + (r[4] ? ' (' + r[4] + ')' : '') +
-      '. Lo recogió el ' + r[0] + ', hace ' + Math.floor(horas) + ' horas.');
+
+    const carrito = r[1], nombre = String(r[3]), lugar = r[4], cuando = r[0];
+    const contacto = String(r[C_CONTACTO - 1] || '').replace(/^'/, '').trim();
+    const recordatorio = 'Hola, ' + nombre.split(' ')[0] + '. Según el registro, el ' + carrito +
+      ' que recogiste el ' + cuando + (lugar ? ' para ' + lugar : '') +
+      ' todavía no aparece como devuelto. Si ya lo devolviste, escanea el QR del carrito y toca' +
+      ' «Lo devuelvo». Si necesitas ayuda, comunícate con ' + RESPONSABLES + '. Gracias.';
+    let linea = '• ' + carrito + ': ' + nombre + (lugar ? ' (' + lugar + ')' : '') +
+      '. Lo recogió el ' + cuando + ', hace ' + Math.floor(horas) + ' horas.';
+    if (esCorreo_(contacto)) {
+      MailApp.sendEmail(contacto, 'Recordatorio: ' + carrito + ' sin devolver', recordatorio);
+      linea += '\n  Se le envió un recordatorio a ' + contacto + '.';
+    } else {
+      const tel = telefono_(contacto);
+      if (tel) {
+        linea += '\n  Teléfono: ' + contacto + '. Enviarle WhatsApp: https://wa.me/' + tel +
+          '?text=' + encodeURIComponent(recordatorio);
+      } else if (contacto) {
+        linea += '\n  Contacto: ' + contacto;
+      }
+    }
+    tarde.push(linea);
   });
   const para = correos_(ss);
   if (tarde.length && para.length) {
     MailApp.sendEmail(para.join(','),
       '⚠️ ' + (tarde.length === 1 ? 'Un carrito lleva' : tarde.length + ' carritos llevan') +
       ' más de 24 horas sin devolver',
-      'No se ha registrado la devolución de:\n\n' + tarde.join('\n') +
+      'No se ha registrado la devolución de:\n\n' + tarde.join('\n\n') +
       '\n\nConfirmen con la persona. La fila está en rojo en la hoja "Avisos de carritos".');
   }
+}
+
+function esCorreo_(c) {
+  return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(c);
+}
+
+function telefono_(c) {
+  const dig = String(c).replace(/\D/g, '');
+  if (dig.length === 10) return '1' + dig;
+  if (dig.length === 11 && dig[0] === '1') return dig;
+  return '';
 }
 
 function fecha_(d) {
@@ -127,7 +160,7 @@ function hojaAvisos_(ss) {
     h = ss.insertSheet('Avisos', 0);
     h.appendRow(ENCABEZADOS);
     h.setFrozenRows(1);
-  } else if (h.getRange(1, C_MARCA).getValue() !== ENCABEZADOS[C_MARCA - 1]) {
+  } else if (h.getRange(1, C_CONTACTO).getValue() !== ENCABEZADOS[C_CONTACTO - 1]) {
     h.getRange(1, 1, 1, ENCABEZADOS.length).setValues([ENCABEZADOS]);
   }
   h.getRange(1, 1, 1, ENCABEZADOS.length).setFontWeight('bold');
@@ -144,7 +177,7 @@ function correos_(ss) {
   }
   return h.getRange(1, 1, h.getLastRow(), 1).getValues().flat()
     .map(c => String(c).trim())
-    .filter(c => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(c));
+    .filter(esCorreo_);
 }
 
 function t_(v, max) {

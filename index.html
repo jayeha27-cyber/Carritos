@@ -84,6 +84,7 @@ button.btn{font:inherit;font-weight:700;width:100%;cursor:pointer}
 [hidden]{display:none!important}
 .registro select,.registro textarea,.registro input:not([type=checkbox]):not([type=radio]){font:inherit;font-size:1rem;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg);width:100%;box-sizing:border-box}
 .registro select:focus-visible,.registro input:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
+.nota{margin:-4px 0 0;font-size:.88rem;color:var(--muted)}
 .lugar-info{background:var(--accent-soft);border-radius:10px;padding:12px 14px;display:grid;gap:4px}
 .lugar-info strong{font-family:var(--display)}
 .registro{display:grid;gap:10px}
@@ -129,6 +130,9 @@ footer{color:var(--muted);font-size:.85rem;border-top:1px solid var(--line);padd
       <select id="lugar"></select>
       <input id="lugar-otro" type="text" placeholder="Escribe el lugar" hidden>
       <div id="lugar-info" class="lugar-info" hidden></div>
+      <label for="contacto" class="eyebrow">Tu teléfono o correo (opcional)</label>
+      <input id="contacto" type="text" autocomplete="email" placeholder="787-555-1234 o tucorreo@gmail.com">
+      <p class="nota">Solo se usa para recordarte si pasan 24 horas y el carrito no aparece como devuelto.</p>
     </div>
     <div id="solo-devuelvo" class="grupo" hidden>
       <fieldset class="checks">
@@ -277,6 +281,9 @@ sel.innerHTML = '<option value="">Elige una localidad</option>' +
   LUGARES.map((l, i) => `<option value="${i}">${esc(l.nombre)}</option>`).join("") +
   '<option value="otro">Otro lugar</option>';
 try { inp.value = localStorage.getItem("nombre") || ""; } catch (e) {}
+const contacto = document.getElementById("contacto");
+try { contacto.value = localStorage.getItem("contacto") || ""; } catch (e) {}
+contacto.addEventListener("input", () => { try { localStorage.setItem("contacto", contacto.value); } catch (e) {} });
 document.getElementById("aviso-btns").innerHTML = AVISOS_A.map((p, i) =>
   `<a id="btn-aviso-${i}" class="btn" target="_blank" rel="noopener">Enviar a ${esc(p.nombre)}</a>`).join("");
 document.getElementById("prob-btns").innerHTML = PROBLEMAS_A.map((p, i) =>
@@ -405,7 +412,7 @@ document.getElementById("btn-enviar").addEventListener("click", () => {
   const n = nombreLimpio(); if (!nombreCompleto(n)) return;
   const recojo = accion() === "recojo";
   const datos = recojo
-    ? { tipo: "Recogido", carrito: actual.nombre, nombre: n, localidad: lugarElegido() }
+    ? { tipo: "Recogido", carrito: actual.nombre, nombre: n, localidad: lugarElegido(), contacto: contacto.value.trim() }
     : { tipo: "Devuelto", carrito: actual.nombre, nombre: n,
         revision: checks.map(c => `${c.value} ${c.checked ? "✓" : "✗"}`).join(" · "),
         pendientes: checks.filter(c => !c.checked).map(c => c.value).join(", "),
